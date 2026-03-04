@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>MarketIQ — Daily Finance Quiz</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00ff88">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset & Custom Properties ─────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #141414;
+      --surface2:  #1e1e1e;
+      --surface3:  #282828;
+      --border:    #2a2a2a;
+      --border2:   #333333;
+      --text:      #e0e0e0;
+      --text-dim:  #999999;
+      --text-faint:#555555;
+      --green:     #00ff88;
+      --green-dim: rgba(0,255,136,.12);
+      --green-glow:rgba(0,255,136,.25);
+      --red:       #ff4444;
+      --red-dim:   rgba(255,68,68,.12);
+      --yellow:    #ffcc00;
+      --blue:      #4488ff;
+      --purple:    #aa66ff;
+      --orange:    #ff8800;
+      --cyan:      #00d4ff;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Screens ────────────────────────────────────────────────────────────── */
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      padding: 0 1rem 2rem;
+      flex-direction: column;
+      align-items: center;
+    }
+    .screen.active { display: flex; }
+
+    /* ── Logo ───────────────────────────────────────────────────────────────── */
+    .logo {
+      font-family: var(--mono);
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--text);
+    }
+    .logo .accent { color: var(--green); }
+
+    /* ── Buttons ────────────────────────────────────────────────────────────── */
+    button { cursor: pointer; border: none; font-family: var(--sans); }
+
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 36px;
+      border-radius: var(--radius-sm);
+      transition: background .2s, transform .15s, box-shadow .2s;
+      letter-spacing: .3px;
+    }
+    .btn-primary:hover {
+      background: #00e07a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--green-glow);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text-dim);
+      font-weight: 500;
+      font-size: .9rem;
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      transition: background .2s, color .2s;
+    }
+    .btn-secondary:hover { background: var(--surface3); color: var(--text); }
+
+    .btn-next {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface2);
+      color: var(--green);
+      font-weight: 600;
+      font-size: .95rem;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      transition: background .2s, border-color .2s, transform .15s;
+      font-family: var(--mono);
+      letter-spacing: .5px;
+      margin-top: 1rem;
+    }
+    .btn-next:hover {
+      background: var(--green-dim);
+      border-color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    /* ── Cards ──────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* ── Badges ─────────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    /* Category badges */
+    .badge-geopolitical { background: rgba(255,68,68,.15);   color: #ff7777; border: 1px solid rgba(255,68,68,.3); }
+    .badge-economic     { background: rgba(255,204,0,.12);   color: #ffcc00; border: 1px solid rgba(255,204,0,.3); }
+    .badge-financial    { background: rgba(0,255,136,.12);   color: #00ff88; border: 1px solid rgba(0,255,136,.3); }
+    .badge-macro        { background: rgba(255,204,0,.12);   color: #ffcc00; border: 1px solid rgba(255,204,0,.3); }
+    .badge-central_bank { background: rgba(68,136,255,.15);  color: #7aabff; border: 1px solid rgba(68,136,255,.3); }
+    .badge-earnings     { background: rgba(255,136,0,.15);   color: #ffaa44; border: 1px solid rgba(255,136,0,.3); }
+    .badge-sector       { background: rgba(170,102,255,.15); color: #cc99ff; border: 1px solid rgba(170,102,255,.3); }
+    .badge-commodities  { background: rgba(0,200,150,.15);   color: #00cc96; border: 1px solid rgba(0,200,150,.3); }
+    .badge-credit       { background: rgba(0,212,255,.12);   color: #00d4ff; border: 1px solid rgba(0,212,255,.3); }
+    /* Difficulty badges */
+    .badge-beginner     { background: rgba(0,255,136,.12);   color: #00ff88; border: 1px solid rgba(0,255,136,.3); }
+    .badge-intermediate { background: rgba(255,136,0,.15);   color: #ffaa44; border: 1px solid rgba(255,136,0,.3); }
+    .badge-advanced     { background: rgba(170,102,255,.15); color: #cc99ff; border: 1px solid rgba(170,102,255,.3); }
+
+    /* ── Question type labels ────────────────────────────────────────────────── */
+    .question-type-label {
+      font-family: var(--mono);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .q-type-instrument_impact { color: var(--green); }
+    .q-type-impact_sizing     { color: var(--cyan); }
+    .q-type-trading_strategy  { color: var(--orange); }
+    .q-type-second_order      { color: var(--blue); }
+
+    /* ── Skeleton animation ─────────────────────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position:  400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.6s infinite linear;
+      border-radius: 6px;
+    }
+
+    /* ── Slide-in animation ─────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeUp .35s ease both; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /*  START SCREEN                                                           */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #screen-start {
+      justify-content: flex-start;
+      gap: 0;
+      text-align: center;
+      padding-top: 3rem;
+    }
+
+    .start-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .start-logo {
+      font-size: clamp(2.4rem, 10vw, 4rem);
+      margin-bottom: .5rem;
+    }
+    .start-tagline {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .start-date {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--green);
+      background: var(--green-dim);
+      border: 1px solid rgba(0,255,136,.25);
+      border-radius: 4px;
+      padding: 5px 12px;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .start-desc {
+      font-size: .95rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 360px;
+      margin: 0 auto 1.5rem;
+    }
+    .start-meta {
+      margin-top: 2rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-faint);
+    }
+    .start-meta span { color: var(--green); }
+
+    #error-box {
+      max-width: 360px;
+      margin: 1.5rem auto 0;
+      background: rgba(255,68,68,.08);
+      border: 1px solid rgba(255,68,68,.3);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      color: var(--red);
+      font-size: .875rem;
+      line-height: 1.5;
+    }
+
+    /* Stats strip */
+    .stats-strip {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--text-faint);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    /* Filter chips */
+    .filter-section {
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 500px;
+    }
+    .filter-label {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--text-faint);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+    .chip {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 99px;
+      padding: 5px 12px;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .chip:hover { background: var(--surface3); color: var(--text); }
+    .chip.active {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Refresh */
+    .btn-refresh {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text-dim);
+      font-size: .85rem;
+      padding: 9px 18px;
+      transition: background .2s, color .2s;
+    }
+    .btn-refresh:hover { background: var(--surface3); color: var(--text); }
+    .btn-refresh:disabled { opacity: .4; cursor: not-allowed; }
+
+    .refresh-cooldown {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--text-faint);
+      min-height: 1.2em;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /*  LOADING SCREEN                                                          */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #screen-loading {
+      justify-content: center;
+      gap: 0;
+      align-items: center;
+      text-align: center;
+    }
+
+    .loading-logo {
+      font-size: 2rem;
+      font-family: var(--mono);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .4; }
+    }
+    .loading-dots {
+      font-family: var(--mono);
+      font-size: .85rem;
+      color: var(--text-dim);
+      margin-bottom: 2.5rem;
+    }
+    .loading-dots span {
+      display: inline-block;
+      animation: pulse 1.4s infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: .2s; }
+    .loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+    .loading-status {
+      font-size: .8rem;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      margin-bottom: 2rem;
+    }
+
+    .skeleton-stack {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .skel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .skel-line { height: 12px; margin-bottom: 10px; }
+    .skel-line.lg { height: 18px; }
+    .skel-line.sm { height: 10px; width: 60%; }
+    .skel-badge { height: 18px; width: 90px; border-radius: 4px; margin-bottom: 12px; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /*  QUIZ SCREEN                                                             */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #screen-quiz {
+      padding-top: 0;
+      gap: .75rem;
+      align-items: center;
+    }
+
+    /* Progress bar */
+    .quiz-topbar {
+      width: 100%;
+      max-width: 640px;
+      padding: 14px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-track {
+      flex: 1;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width .4s ease;
+    }
+    .progress-label {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      min-width: 42px;
+      text-align: right;
+    }
+    .score-chip {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    /* Headline card */
+    .headline-card { border-left: 3px solid var(--green); }
+    .headline-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .headline-num {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-faint);
+    }
+    .headline-source {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-faint);
+      margin-left: auto;
+    }
+    .headline-text {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .headline-context {
+      font-size: .85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      margin-top: 2px;
+      margin-bottom: 10px;
+    }
+
+    /* Instrument tags */
+    .instrument-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+    .instrument-tag {
+      font-family: var(--mono);
+      font-size: .68rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px;
+      padding: 3px 8px;
+      color: var(--text-dim);
+      letter-spacing: .3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .instrument-name { color: var(--text-faint); }
+    .instrument-price { font-size: .66rem; }
+    .instrument-price.up   { color: var(--green); }
+    .instrument-price.down { color: var(--red); }
+    .instrument-chg { opacity: .75; font-size: .62rem; }
+
+    /* Question card */
+    .question-type-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-size: .95rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    /* Options */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      width: 100%;
+    }
+    .option-btn {
+      width: 100%;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      text-align: left;
+      transition: background .15s, border-color .15s, transform .1s;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: .9rem;
+      line-height: 1.4;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--green);
+      background: var(--green-dim);
+      transform: translateX(2px);
+    }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct {
+      border-color: var(--green);
+      background: rgba(0,255,136,.1);
+    }
+    .option-btn.wrong {
+      border-color: var(--red);
+      background: rgba(255,68,68,.08);
+    }
+    .option-btn.revealed-correct {
+      border-color: rgba(0,255,136,.35);
+      background: rgba(0,255,136,.04);
+    }
+    .option-letter {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: .8rem;
+      color: var(--text-faint);
+      min-width: 18px;
+      margin-top: 1px;
+      transition: color .15s;
+    }
+    .option-btn.correct  .option-letter { color: var(--green); }
+    .option-btn.wrong    .option-letter { color: var(--red); }
+    .option-btn.revealed-correct .option-letter { color: var(--green); }
+
+    /* Explanations */
+    .explanations-block {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .explanation-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 10px;
+      font-size: .85rem;
+      line-height: 1.7;
+    }
+    .explanation-item.exp-correct {
+      border-left: 3px solid var(--green);
+      background: rgba(0,255,136,.04);
+    }
+    .explanation-item.exp-wrong {
+      border-left: 3px solid var(--surface3);
+    }
+    .exp-id {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: .75rem;
+      min-width: 16px;
+      margin-top: 2px;
+    }
+    .exp-correct .exp-id { color: var(--green); }
+    .exp-wrong   .exp-id { color: var(--text-faint); }
+    .exp-body { flex: 1; }
+    .exp-verdict {
+      font-weight: 600;
+      font-size: .75rem;
+      font-family: var(--mono);
+      letter-spacing: .5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .exp-correct .exp-verdict { color: var(--green); }
+    .exp-wrong   .exp-verdict { color: var(--text-faint); }
+    .exp-text { color: var(--text-dim); }
+
+    /* Takeaway box */
+    .takeaway-box {
+      width: 100%;
+      max-width: 640px;
+      background: rgba(0,255,136,.05);
+      border: 1px solid rgba(0,255,136,.2);
+      border-left: 3px solid var(--green);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: .85rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+    .takeaway-box strong { color: var(--green); }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /*  RESULTS SCREEN                                                          */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #screen-results {
+      justify-content: flex-start;
+      padding-top: 3rem;
+      gap: 1.25rem;
+      text-align: center;
+    }
+
+    .results-logo { font-size: 1.6rem; margin-bottom: .25rem; }
+    .results-subtitle {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-faint);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+
+    .score-board {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 36px;
+      width: 100%;
+      max-width: 380px;
+    }
+    .score-fraction {
+      font-family: var(--mono);
+      font-size: clamp(2.4rem, 12vw, 3.6rem);
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .score-grade {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .score-percent {
+      font-family: var(--mono);
+      font-size: .85rem;
+      color: var(--text-faint);
+    }
+    .score-message {
+      font-size: .95rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 360px;
+    }
+
+    /* Breakdown rows (shared) */
+    .breakdown-section {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .breakdown-title {
+      font-family: var(--mono);
+      font-size: .65rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+      text-align: left;
+    }
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .breakdown-label { font-size: .82rem; color: var(--text-dim); flex: 1; text-align: left; }
+    .breakdown-track {
+      width: 60px;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .breakdown-fill { height: 100%; border-radius: 2px; }
+    .breakdown-stat {
+      font-family: var(--mono);
+      font-size: .8rem;
+      font-weight: 700;
+      min-width: 32px;
+      text-align: right;
+    }
+    /* Colors per question type */
+    .col-impact   { color: var(--green);  }
+    .col-sizing   { color: var(--cyan);   }
+    .col-strategy { color: var(--orange); }
+    .col-second   { color: var(--blue);   }
+    .col-cat      { color: var(--green);  }
+    .fill-impact   { background: var(--green);  }
+    .fill-sizing   { background: var(--cyan);   }
+    .fill-strategy { background: var(--orange); }
+    .fill-second   { background: var(--blue);   }
+    .fill-cat      { background: var(--green);  }
+
+    /* All takeaways section */
+    .takeaways-section {
+      width: 100%;
+      max-width: 480px;
+      text-align: left;
+    }
+    .btn-takeaways {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text-dim);
+      font-size: .88rem;
+      padding: 11px 18px;
+      text-align: left;
+      transition: background .2s, color .2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-takeaways:hover { background: var(--surface3); color: var(--text); }
+    #all-takeaways {
+      margin-top: .5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .takeaway-result-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(0,255,136,.4);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: .82rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .takeaway-result-hl {
+      font-family: var(--mono);
+      font-size: .68rem;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .8rem;
+      padding: 10px 20px;
+      border-radius: 99px;
+      transition: transform .3s ease, opacity .3s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ── Responsive ─────────────────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .card { padding: 16px; }
+      .option-btn { padding: 12px 14px; font-size: .85rem; }
+    }
+    @media (min-width: 641px) {
+      #screen-quiz { padding-top: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════ START SCREEN ══════════════════════════════════ -->
+<div id="screen-start" class="screen active">
+  <div class="start-logo logo">Market<span class="accent">IQ</span></div>
+  <div class="start-tagline">Daily Finance Intelligence</div>
+  <div class="start-date" id="start-date">—</div>
+
+  <!-- Stats strip -->
+  <div id="stats-strip" class="stats-strip" style="display:none">
+    <div class="stat-item">
+      <div class="stat-value" id="stat-streak">🔥 0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-avg">—%</div>
+      <div class="stat-label">Ø Score</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-label">Quizzes</div>
+    </div>
+  </div>
+
+  <p class="start-desc">
+    10 marktrelevante Headlines. 4 Fragen pro Headline —
+    Instrument Impact, Impact Sizing, Trading Strategy &amp; Second-Order Effect.
+  </p>
+
+  <!-- Category filter -->
+  <div class="filter-section">
+    <div class="filter-label">Kategorie filtern</div>
+    <div class="filter-chips" id="filter-chips">
+      <button class="chip active" data-cat="all" onclick="toggleChip('all')">Alle</button>
+      <button class="chip" data-cat="geopolitical"  onclick="toggleChip('geopolitical')">Geopolitik</button>
+      <button class="chip" data-cat="macro"         onclick="toggleChip('macro')">Makro</button>
+      <button class="chip" data-cat="central_bank"  onclick="toggleChip('central_bank')">Zentralbank</button>
+      <button class="chip" data-cat="earnings"      onclick="toggleChip('earnings')">Earnings</button>
+      <button class="chip" data-cat="sector"        onclick="toggleChip('sector')">Sektor</button>
+      <button class="chip" data-cat="commodities"   onclick="toggleChip('commodities')">Rohstoffe</button>
+      <button class="chip" data-cat="credit"        onclick="toggleChip('credit')">Credit</button>
+    </div>
+  </div>
+
+  <div class="start-actions">
+    <button class="btn-primary" onclick="startQuiz()">Quiz starten</button>
+    <button class="btn-refresh" id="btn-refresh" onclick="refreshNews(false)">🔄 Neue Headlines</button>
+  </div>
+  <div class="refresh-cooldown" id="refresh-status" style="margin-top:.5rem"></div>
+  <div id="error-box" style="display:none"></div>
+
+  <div class="start-meta">
+    powered by <span>Groq LLaMA</span> + Live RSS Feeds
+  </div>
+</div>
+
+<!-- ══════════════════════════ LOADING SCREEN ═════════════════════════════════ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-logo logo">Market<span class="accent">IQ</span></div>
+  <div class="loading-dots">
+    Analysiere Headlines<span>.</span><span>.</span><span>.</span>
+  </div>
+  <div class="loading-status" id="loading-status">Lade RSS-Feeds von 12 Quellen</div>
+  <div class="skeleton-stack">
+    <div class="skel-card">
+      <div class="skel-badge skeleton"></div>
+      <div class="skel-line lg skeleton"></div>
+      <div class="skel-line skeleton"></div>
+      <div class="skel-line sm skeleton"></div>
+    </div>
+    <div class="skel-card">
+      <div class="skel-line skeleton" style="width:40%;margin-bottom:14px"></div>
+      <div class="skel-line skeleton"></div>
+      <div class="skel-line skeleton"></div>
+      <div class="skel-line skeleton" style="width:75%"></div>
+    </div>
+    <div class="skel-card">
+      <div class="skel-line skeleton" style="height:38px;border-radius:8px;margin-bottom:8px"></div>
+      <div class="skel-line skeleton" style="height:38px;border-radius:8px;margin-bottom:8px"></div>
+      <div class="skel-line skeleton" style="height:38px;border-radius:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ QUIZ SCREEN ═══════════════════════════════════ -->
+<div id="screen-quiz" class="screen">
+  <!-- Progress -->
+  <div class="quiz-topbar">
+    <div class="score-chip" id="quiz-score">0 pts</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">1/40</div>
+  </div>
+
+  <!-- Headline card -->
+  <div class="card headline-card animate-in" id="headline-card">
+    <div class="headline-meta">
+      <span class="headline-num" id="hl-num">#1</span>
+      <span class="badge badge-macro" id="hl-cat">macro</span>
+      <span class="headline-source" id="hl-src"></span>
+    </div>
+    <h2 class="headline-text" id="hl-text">—</h2>
+    <p class="headline-context" id="hl-ctx">—</p>
+    <div class="instrument-tags" id="hl-instruments" style="display:none"></div>
+  </div>
+
+  <!-- Question card -->
+  <div class="card animate-in" id="question-card" style="animation-delay:.05s">
+    <div class="question-type-row">
+      <span id="q-type" class="question-type-label q-type-instrument_impact">📊 Instrument Impact</span>
+      <span id="q-difficulty" class="badge badge-beginner">beginner</span>
+    </div>
+    <p class="question-text" id="q-text">—</p>
+    <div class="options-list" id="options-list"></div>
+  </div>
+
+  <!-- Explanations (hidden until answer) -->
+  <div class="explanations-block" id="explanations" style="display:none"></div>
+
+  <!-- Takeaway box (shown only after second_order question) -->
+  <div class="takeaway-box" id="takeaway-box" style="display:none">
+    💡 <strong>Merke dir:</strong> <span id="takeaway-text"></span>
+  </div>
+
+  <!-- Next button (hidden until answer) -->
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()" style="display:none">Weiter →</button>
+</div>
+
+<!-- ══════════════════════════ RESULTS SCREEN ════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="results-logo logo">Market<span class="accent">IQ</span></div>
+  <div class="results-subtitle" id="results-date">Heutiges Quiz</div>
+
+  <div class="score-board animate-in">
+    <div class="score-fraction" id="res-score">—</div>
+    <div class="score-grade" id="res-grade">—</div>
+    <div class="score-percent" id="res-percent">—</div>
+  </div>
+
+  <p class="score-message" id="res-message"></p>
+
+  <!-- Per question-type breakdown -->
+  <div class="breakdown-section" id="qtype-breakdown">
+    <div class="breakdown-title">Nach Fragetyp</div>
+  </div>
+
+  <!-- Category breakdown -->
+  <div class="breakdown-section" id="cat-breakdown">
+    <div class="breakdown-title">Nach Kategorie</div>
+  </div>
+
+  <!-- All takeaways toggle -->
+  <div class="takeaways-section">
+    <button class="btn-takeaways" onclick="toggleTakeaways()">
+      <span>💡 Alle Takeaways anzeigen</span>
+      <span id="takeaways-arrow">▼</span>
+    </button>
+    <div id="all-takeaways" style="display:none"></div>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn-primary" onclick="shareScore()">Ergebnis teilen</button>
+    <button class="btn-refresh" id="btn-refresh-results" onclick="refreshNews(true)">🔄 Neue Headlines laden</button>
+    <div class="refresh-cooldown" id="refresh-status-results"></div>
+    <button class="btn-secondary" onclick="restartQuiz()">Nochmal spielen</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Constants ──────────────────────────────────────────────────────────────
+const PTS = { beginner: 1, intermediate: 2, advanced: 3 };
+const STATS_KEY = 'marketiq_stats';
+
+// Question type order within each headline
+const Q_ORDER = ['instrument_impact', 'impact_sizing', 'trading_strategy', 'second_order'];
+
+const Q_LABEL = {
+  instrument_impact: '📊 Instrument Impact',
+  impact_sizing:     '📐 Impact Sizing',
+  trading_strategy:  '💰 Trading Strategy',
+  second_order:      '🔗 Second-Order',
+};
+
+const Q_CLASS = {
+  instrument_impact: 'q-type-instrument_impact',
+  impact_sizing:     'q-type-impact_sizing',
+  trading_strategy:  'q-type-trading_strategy',
+  second_order:      'q-type-second_order',
+};
+
+const Q_COL = {
+  instrument_impact: 'col-impact',
+  impact_sizing:     'col-sizing',
+  trading_strategy:  'col-strategy',
+  second_order:      'col-second',
+};
+
+const Q_FILL = {
+  instrument_impact: 'fill-impact',
+  impact_sizing:     'fill-sizing',
+  trading_strategy:  'fill-strategy',
+  second_order:      'fill-second',
+};
+
+const CATEGORY_LABELS = {
+  geopolitical: 'Geopolitik',
+  macro:        'Makro',
+  central_bank: 'Zentralbank',
+  earnings:     'Earnings',
+  sector:       'Sektor',
+  commodities:  'Rohstoffe',
+  credit:       'Credit',
+  economic:     'Wirtschaft',
+  financial:    'Finanzen',
+};
+
+// ── State ──────────────────────────────────────────────────────────────────
+const S = {
+  data:              null,
+  idx:               0,                    // index into filteredHeadlines
+  qType:             'instrument_impact',  // current question type
+  score:             0,                    // weighted pts earned
+  maxScore:          0,                    // max weighted pts for this quiz
+  answered:          false,
+  answers:           [],
+  filter:            [],
+  filteredHeadlines: [],
+};
+
+// ── Screen management ──────────────────────────────────────────────────────
+const screens = {
+  start:   document.getElementById('screen-start'),
+  loading: document.getElementById('screen-loading'),
+  quiz:    document.getElementById('screen-quiz'),
+  results: document.getElementById('screen-results'),
+};
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  const now = new Date();
+  document.getElementById('start-date').textContent = now.toLocaleDateString('de-AT', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    timeZone: 'Europe/Vienna',
+  });
+  document.getElementById('results-date').textContent = now.toLocaleDateString('de-AT', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+  renderStats();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+})();
+
+// ── Stats (localStorage) ───────────────────────────────────────────────────
+function getStats() {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY)) || null; } catch { return null; }
+}
+
+function saveStats(stats) {
+  try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch {}
+}
+
+function updateStats() {
+  const stats = getStats() || {
+    streak: 0, lastPlayedDate: null,
+    totalQuizzes: 0, totalWeightedCorrect: 0, totalWeightedMax: 0,
+    categoryStats: {},
+  };
+
+  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Vienna' });
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toLocaleDateString('en-CA', { timeZone: 'Europe/Vienna' });
+
+  if (stats.lastPlayedDate !== todayStr) {
+    stats.streak = stats.lastPlayedDate === yesterdayStr ? stats.streak + 1 : 1;
+    stats.lastPlayedDate = todayStr;
+    stats.totalQuizzes += 1;
+  }
+
+  stats.totalWeightedCorrect += S.score;
+  stats.totalWeightedMax += S.maxScore;
+
+  S.answers.forEach(a => {
+    if (!stats.categoryStats[a.category]) stats.categoryStats[a.category] = { correct: 0, total: 0 };
+    stats.categoryStats[a.category].total++;
+    if (a.correct) stats.categoryStats[a.category].correct++;
+  });
+
+  saveStats(stats);
+}
+
+function renderStats() {
+  const stats = getStats();
+  const strip = document.getElementById('stats-strip');
+  if (!stats || stats.totalQuizzes === 0) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  document.getElementById('stat-streak').textContent = `🔥 ${stats.streak}`;
+  const avg = stats.totalWeightedMax > 0
+    ? Math.round((stats.totalWeightedCorrect / stats.totalWeightedMax) * 100) : 0;
+  document.getElementById('stat-avg').textContent = `${avg}%`;
+  document.getElementById('stat-total').textContent = stats.totalQuizzes;
+}
+
+// ── Category filter ────────────────────────────────────────────────────────
+function toggleChip(cat) {
+  if (cat === 'all') {
+    S.filter = [];
+    document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-cat="all"]').classList.add('active');
+    return;
+  }
+  const idx = S.filter.indexOf(cat);
+  if (idx === -1) S.filter.push(cat); else S.filter.splice(idx, 1);
+  if (S.filter.length === 0) {
+    document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-cat="all"]').classList.add('active');
+  } else {
+    document.querySelector('[data-cat="all"]').classList.remove('active');
+    document.querySelectorAll('#filter-chips .chip[data-cat]').forEach(c => {
+      if (c.dataset.cat !== 'all') c.classList.toggle('active', S.filter.includes(c.dataset.cat));
+    });
+  }
+}
+
+function applyFilter() {
+  if (!S.data?.headlines) { S.filteredHeadlines = []; S.maxScore = 0; return; }
+  S.filteredHeadlines = S.filter.length === 0
+    ? [...S.data.headlines]
+    : S.data.headlines.filter(hl => S.filter.includes(hl.category));
+  if (S.filteredHeadlines.length === 0) S.filteredHeadlines = [...S.data.headlines];
+
+  S.maxScore = S.filteredHeadlines.reduce((sum, hl) =>
+    sum + Q_ORDER.reduce((s, qt) => s + (PTS[hl[qt]?.difficulty] || 1), 0), 0);
+}
+
+// ── Refresh ────────────────────────────────────────────────────────────────
+async function refreshNews(fromResults) {
+  const statusEl = document.getElementById(fromResults ? 'refresh-status-results' : 'refresh-status');
+  const btn = document.getElementById(fromResults ? 'btn-refresh-results' : 'btn-refresh');
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Lade neue Headlines…';
+  try {
+    const res = await fetch('/api/quiz?refresh=true');
+    if (!res.ok) throw new Error(`Server-Fehler (${res.status})`);
+    const data = await res.json();
+    if (data.cooldown_remaining) {
+      if (statusEl) statusEl.textContent =
+        `⏱ Bitte warte noch ${data.cooldown_remaining} Min. für neue Headlines.`;
+      if (btn) btn.disabled = false;
+      return;
+    }
+    S.data = data;
+    if (statusEl) statusEl.textContent = '';
+    if (btn) btn.disabled = false;
+    showToast('Neue Headlines geladen ✓');
+    showScreen('start');
+    renderStats();
+  } catch (err) {
+    if (statusEl) statusEl.textContent = `Fehler: ${err.message}`;
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Load quiz ──────────────────────────────────────────────────────────────
+async function startQuiz() {
+  document.getElementById('error-box').style.display = 'none';
+  showScreen('loading');
+
+  const messages = [
+    'Lade RSS-Feeds von 12 Quellen',
+    'Dedupliziere Nachrichten via Jaccard',
+    'Sende Headlines an Groq LLaMA',
+    'Generiere Instrument-Impact-Fragen',
+    'Generiere Impact-Sizing mit historischen Vergleichen',
+    'Generiere Trading-Strategien mit Greeks',
+    'Generiere Second-Order Effects',
+    'Quiz wird finalisiert',
+  ];
+  let msgIdx = 0;
+  const msgEl = document.getElementById('loading-status');
+  const msgInterval = setInterval(() => {
+    msgEl.textContent = messages[++msgIdx % messages.length];
+  }, 3000);
+
+  try {
+    const res = await fetch('/api/quiz');
+    clearInterval(msgInterval);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || `Server-Fehler (${res.status})`);
+    }
+    S.data = await res.json();
+    S.idx = 0;
+    S.qType = 'instrument_impact';
+    S.score = 0;
+    S.answered = false;
+    S.answers = [];
+    applyFilter();
+    renderQuestion();
+    showScreen('quiz');
+  } catch (err) {
+    clearInterval(msgInterval);
+    showError(err.message);
+  }
+}
+
+// ── Render question ────────────────────────────────────────────────────────
+function renderQuestion() {
+  const hl = S.filteredHeadlines[S.idx];
+  const q  = hl[S.qType];
+  const total   = S.filteredHeadlines.length * 4;
+  const qOffset = Q_ORDER.indexOf(S.qType);
+  const current = S.idx * 4 + qOffset + 1;
+
+  // Progress
+  document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+  document.getElementById('progress-label').textContent = `${current}/${total}`;
+
+  // Running max before this question
+  let runningMax = 0;
+  for (let i = 0; i < S.idx; i++) {
+    runningMax += Q_ORDER.reduce((s, qt) => s + (PTS[S.filteredHeadlines[i][qt]?.difficulty] || 1), 0);
+  }
+  for (let j = 0; j < qOffset; j++) {
+    runningMax += PTS[hl[Q_ORDER[j]]?.difficulty] || 1;
+  }
+  document.getElementById('quiz-score').textContent =
+    runningMax > 0 ? `${S.score}/${runningMax} pts` : `${S.score} pts`;
+
+  // Headline
+  document.getElementById('hl-num').textContent = `#${S.idx + 1}`;
+  const catEl = document.getElementById('hl-cat');
+  catEl.textContent = hl.category;
+  catEl.className = `badge badge-${hl.category}`;
+  document.getElementById('hl-src').textContent = hl.source || '';
+  document.getElementById('hl-text').textContent = hl.headline;
+  document.getElementById('hl-ctx').textContent = hl.context;
+
+  // Affected instruments with live prices
+  const instrEl = document.getElementById('hl-instruments');
+  if (hl.affected_instruments?.length) {
+    instrEl.innerHTML = hl.affected_instruments.map(inst => {
+      const name = typeof inst === 'string' ? inst : (inst.name || inst);
+      let priceHtml = '';
+      if (typeof inst === 'object' && inst.price != null) {
+        const dir = inst.change >= 0 ? 'up' : 'down';
+        const sign = inst.change >= 0 ? '+' : '';
+        priceHtml = `<span class="instrument-price ${dir}">${fmtPrice(inst.price, inst.symbol)} <span class="instrument-chg">${sign}${(inst.change || 0).toFixed(2)}%</span></span>`;
+      }
+      return `<span class="instrument-tag"><span class="instrument-name">${escHtml(name)}</span>${priceHtml}</span>`;
+    }).join('');
+    instrEl.style.display = 'flex';
+  } else {
+    instrEl.style.display = 'none';
+  }
+
+  // Question type label + difficulty
+  const typeEl = document.getElementById('q-type');
+  typeEl.textContent = Q_LABEL[S.qType];
+  typeEl.className = `question-type-label ${Q_CLASS[S.qType]}`;
+  const diffEl = document.getElementById('q-difficulty');
+  diffEl.textContent = q?.difficulty || 'beginner';
+  diffEl.className = `badge badge-${q?.difficulty || 'beginner'}`;
+
+  // Question text
+  document.getElementById('q-text').textContent = q?.question || '—';
+
+  // Options
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  (q?.options || []).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.id = opt.id;
+    btn.innerHTML = `<span class="option-letter">${opt.id}</span><span>${escHtml(opt.text)}</span>`;
+    btn.addEventListener('click', () => selectAnswer(opt.id));
+    list.appendChild(btn);
+  });
+
+  // Reset UI
+  document.getElementById('explanations').style.display = 'none';
+  document.getElementById('explanations').innerHTML = '';
+  document.getElementById('takeaway-box').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+  S.answered = false;
+
+  // Re-trigger animations
+  ['headline-card', 'question-card'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('animate-in');
+    void el.offsetWidth;
+    el.classList.add('animate-in');
+  });
+}
+
+// ── Answer selection ───────────────────────────────────────────────────────
+function selectAnswer(selectedId) {
+  if (S.answered) return;
+  S.answered = true;
+
+  const hl  = S.filteredHeadlines[S.idx];
+  const q   = hl[S.qType];
+  const sel = q.options.find(o => o.id === selectedId);
+  const isCorrect = sel?.correct ?? false;
+  const pts = PTS[q.difficulty] || 1;
+
+  if (isCorrect) S.score += pts;
+  S.answers.push({
+    headlineId: hl.id,
+    qType:      S.qType,
+    correct:    isCorrect,
+    category:   hl.category,
+    difficulty: q.difficulty,
+    pts:        isCorrect ? pts : 0,
+  });
+
+  // Color buttons
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    const opt = q.options.find(o => o.id === btn.dataset.id);
+    btn.disabled = true;
+    if (opt.correct) {
+      btn.classList.add(btn.dataset.id === selectedId ? 'correct' : 'revealed-correct');
+    } else if (btn.dataset.id === selectedId) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  // Running max including this question
+  const qOffset = Q_ORDER.indexOf(S.qType);
+  let runningMax = 0;
+  for (let i = 0; i < S.idx; i++) {
+    runningMax += Q_ORDER.reduce((s, qt) => s + (PTS[S.filteredHeadlines[i][qt]?.difficulty] || 1), 0);
+  }
+  for (let j = 0; j <= qOffset; j++) {
+    runningMax += PTS[hl[Q_ORDER[j]]?.difficulty] || 1;
+  }
+  document.getElementById('quiz-score').textContent = `${S.score}/${runningMax} pts`;
+
+  // Build explanations
+  const expBlock = document.getElementById('explanations');
+  expBlock.innerHTML = '';
+  q.options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = `explanation-item ${opt.correct ? 'exp-correct' : 'exp-wrong'}`;
+    div.innerHTML = `
+      <span class="exp-id">${opt.id}</span>
+      <div class="exp-body">
+        <span class="exp-verdict">${opt.correct ? '✓ Richtig' : '✗ Falsch'}</span>
+        <span class="exp-text">${escHtml(opt.explanation)}</span>
+      </div>`;
+    expBlock.appendChild(div);
+  });
+  expBlock.style.display = 'flex';
+
+  // Takeaway only after the last question of a headline (second_order)
+  if (S.qType === 'second_order' && hl.takeaway) {
+    document.getElementById('takeaway-text').textContent = hl.takeaway;
+    document.getElementById('takeaway-box').style.display = 'block';
+  }
+
+  // Next button
+  document.getElementById('btn-next').textContent = getNextLabel();
+  document.getElementById('btn-next').style.display = 'block';
+
+  setTimeout(() => expBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+}
+
+function getNextLabel() {
+  const qIdx = Q_ORDER.indexOf(S.qType);
+  if (qIdx < Q_ORDER.length - 1) {
+    const nextLabels = {
+      impact_sizing:    '📐 Impact Sizing →',
+      trading_strategy: '💰 Trading Strategy →',
+      second_order:     '🔗 Second-Order →',
+    };
+    return nextLabels[Q_ORDER[qIdx + 1]];
+  }
+  if (S.idx < S.filteredHeadlines.length - 1) return `Headline ${S.idx + 2} →`;
+  return 'Ergebnis anzeigen ✓';
+}
+
+// ── Next question / headline ───────────────────────────────────────────────
+function nextQuestion() {
+  const qIdx = Q_ORDER.indexOf(S.qType);
+  if (qIdx < Q_ORDER.length - 1) {
+    S.qType = Q_ORDER[qIdx + 1];
+    renderQuestion();
+  } else if (S.idx < S.filteredHeadlines.length - 1) {
+    S.idx++;
+    S.qType = 'instrument_impact';
+    renderQuestion();
+  } else {
+    showResults();
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Results ────────────────────────────────────────────────────────────────
+function showResults() {
+  const pct   = S.maxScore > 0 ? Math.round((S.score / S.maxScore) * 100) : 0;
+  const grade = getGrade(pct);
+  document.getElementById('res-score').textContent   = `${S.score}/${S.maxScore}`;
+  document.getElementById('res-grade').textContent   = `Grade: ${grade}`;
+  document.getElementById('res-percent').textContent = `${pct}% gewichtet`;
+  document.getElementById('res-message').textContent = getMessage(pct);
+
+  // Q-type breakdown
+  const typeStats = {};
+  Q_ORDER.forEach(qt => { typeStats[qt] = { correct: 0, total: 0 }; });
+  S.answers.forEach(a => {
+    if (!typeStats[a.qType]) return;
+    typeStats[a.qType].total++;
+    if (a.correct) typeStats[a.qType].correct++;
+  });
+
+  const qtBreakdown = document.getElementById('qtype-breakdown');
+  qtBreakdown.innerHTML = '<div class="breakdown-title">Nach Fragetyp</div>';
+  Q_ORDER.forEach(qt => {
+    const { correct, total } = typeStats[qt];
+    if (!total) return;
+    const p = Math.round((correct / total) * 100);
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `
+      <span class="breakdown-label">${Q_LABEL[qt]}</span>
+      <div class="breakdown-track"><div class="breakdown-fill ${Q_FILL[qt]}" style="width:${p}%"></div></div>
+      <span class="breakdown-stat ${Q_COL[qt]}">${correct}/${total}</span>`;
+    qtBreakdown.appendChild(row);
+  });
+
+  // Category breakdown
+  const catStats = {};
+  S.answers.forEach(a => {
+    if (!catStats[a.category]) catStats[a.category] = { correct: 0, total: 0 };
+    catStats[a.category].total++;
+    if (a.correct) catStats[a.category].correct++;
+  });
+
+  const catBreakdown = document.getElementById('cat-breakdown');
+  catBreakdown.innerHTML = '<div class="breakdown-title">Nach Kategorie</div>';
+  Object.entries(catStats).forEach(([cat, { correct, total }]) => {
+    if (!total) return;
+    const p = Math.round((correct / total) * 100);
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `
+      <span class="breakdown-label">${CATEGORY_LABELS[cat] || cat}</span>
+      <div class="breakdown-track"><div class="breakdown-fill fill-cat" style="width:${p}%"></div></div>
+      <span class="breakdown-stat col-cat">${correct}/${total}</span>`;
+    catBreakdown.appendChild(row);
+  });
+
+  // All takeaways
+  const allTakeaways = document.getElementById('all-takeaways');
+  allTakeaways.innerHTML = '';
+  S.filteredHeadlines.forEach((hl, i) => {
+    if (!hl.takeaway) return;
+    const item = document.createElement('div');
+    item.className = 'takeaway-result-item';
+    item.innerHTML = `
+      <span class="takeaway-result-hl">#${i + 1} ${escHtml(hl.headline.substring(0, 60))}…</span>
+      ${escHtml(hl.takeaway)}`;
+    allTakeaways.appendChild(item);
+  });
+
+  updateStats();
+  showScreen('results');
+}
+
+function toggleTakeaways() {
+  const el = document.getElementById('all-takeaways');
+  const arrow = document.getElementById('takeaways-arrow');
+  const show = el.style.display === 'none';
+  el.style.display = show ? 'flex' : 'none';
+  arrow.textContent = show ? '▲' : '▼';
+}
+
+function getGrade(pct) {
+  if (pct >= 95) return 'A+';
+  if (pct >= 85) return 'A';
+  if (pct >= 75) return 'B';
+  if (pct >= 65) return 'C';
+  if (pct >= 50) return 'D';
+  return 'F';
+}
+
+function getMessage(pct) {
+  if (pct >= 90) return 'Exzellent! Du hast das Niveau eines Senior Analysten erreicht.';
+  if (pct >= 75) return 'Sehr gut! Du verfügst über solides Finanzwissen.';
+  if (pct >= 60) return 'Gut! Mit etwas mehr Praxis wirst du noch besser.';
+  if (pct >= 45) return 'Solide Basis. Regelmäßiges Üben verbessert dein Ergebnis deutlich.';
+  return 'Weiter üben! Täglich spielen ist der Weg zum Profi.';
+}
+
+// ── Share ──────────────────────────────────────────────────────────────────
+async function shareScore() {
+  const pct  = S.maxScore > 0 ? Math.round((S.score / S.maxScore) * 100) : 0;
+  const text = `📊 MarketIQ Daily Quiz: ${S.score}/${S.maxScore} pts (${pct}%) — Grade ${getGrade(pct)}\nFinanzwissen täglich schärfen 🧠`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'MarketIQ', text }); return; } catch {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Ergebnis kopiert ✓');
+  } catch { showToast('Teilen nicht möglich'); }
+}
+
+function restartQuiz() {
+  S.data = null;
+  showScreen('start');
+  renderStats();
+}
+
+// ── Toast / Error ──────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = `⚠ ${msg}`;
+  box.style.display = 'block';
+  showScreen('start');
+}
+
+// ── Util ───────────────────────────────────────────────────────────────────
+function fmtPrice(price, symbol = '') {
+  if (price == null) return '—';
+  if (symbol === '^TNX' || symbol === '^IRX') return `${price.toFixed(3)}%`;
+  if (symbol === '^VIX') return price.toFixed(2);
+  if (symbol?.includes('=X') || symbol === 'DX-Y.NYB') return price.toFixed(4);
+  if (symbol === 'BTC-USD') return `$${Math.round(price).toLocaleString('en-US')}`;
+  if (price >= 1000) return `$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+  return `$${price.toFixed(2)}`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
